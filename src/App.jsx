@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { uniq, filter, some } from "lodash";
+import { uniq, filter, some, isEmpty } from "lodash";
+import './style.css';
 import csv from "./dataSheet.csv";
 import { mentionParser } from "./parser";
 
@@ -64,7 +65,7 @@ function App() {
         </div>
       </div>
       <div className="container is-max-desktop mt-6">
-        <ul>
+        <ul className="px-3">
           {filtedData.map((item, index) => (
             <li key={`${item.ep}${index}`}>
               <div className="mb-1">{item.createAt}</div>
@@ -74,24 +75,28 @@ function App() {
                 </summary>
                 <div className="notification content mb-5">
                   {item.description && <p>{item.description}</p>}
-                  <div className="buttons are-small">
+                  <div className="buttons are-small mb-0">
                     {item.mention.map((name, index) => (
                       <a
                         href={`https://www.google.com/search?q=${name}`}
                         target="_blank"
-                        className="button is-rounded"
-                        style={{ lineHeight: 1 }}
+                        className="button is-rounded has-text-weight-bold"
                         key={index}
+                        title="有請 google 大神"
                       >
                         #{name}
                       </a>
                     ))}
                   </div>
+                  { !isEmpty(item.link) && <a href={item.link} target="_blank">podcast連結</a>}
                 </div>
               </details>
             </li>
           ))}
         </ul>
+      </div>
+      <div className="fixed-buttons">
+        <a href="#" className="button is-rounded">▴</a>
       </div>
     </>
   );
