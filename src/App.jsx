@@ -1,23 +1,32 @@
-import { useMemo, useState } from "react";
-import { uniq, filter, some, isEmpty } from "lodash";
 import "./style.css";
-import csv from "./dataSheet.csv";
-import { mentionParser } from "./parser";
+import { useEffect, useMemo, useState } from "react";
+import { uniq, filter, some, isEmpty } from "lodash";
 import useModal from "./useModal";
 import Modal from "./modal";
-
-let list = csv.map(({ title, mention, ...res }) => {
-  return {
-    title,
-    mention: uniq([...mentionParser(title), ...mentionParser(mention)]),
-    ...res,
-  };
-});
+import { mentionParser, csvFormatter } from "./helper";
 
 function App() {
-  const [data, setData] = useState(list);
+  const [data, setData] = useState([]);
   const [keyword, setKeyword] = useState("");
   const { isShowing, toggle } = useModal();
+
+  useEffect(() => {
+    fetch(
+      "https://sheets.googleapis.com/v4/spreadsheets/1BK64BqcqWTxdIDiqvB6ku3SN4P5F_zSlvQYDRIJn-lA/values/podcast?key=AIzaSyAVlwHA4EQx7AWjK1QsT87shL37vhKWrl4"
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const list = csvFormatter(data.values).map(({ title, mention, ...res }) => {
+          return {
+            title,
+            mention: uniq([...mentionParser(title), ...mentionParser(mention)]),
+            ...res,
+          };
+        })
+
+        setData(list);
+      });
+  }, []);
 
   const filtedData = useMemo(() => {
     if (keyword === "") return data;
@@ -29,7 +38,7 @@ function App() {
         description.toLowerCase().includes(lowerKeyword) ||
         some(mention, (name) => name.toLowerCase().includes(lowerKeyword))
     );
-  }, [keyword]);
+  }, [data, keyword]);
 
   return (
     <>
@@ -86,7 +95,7 @@ function App() {
                 <details open={false}>
                   <summary
                     className="title is-5 is-clickable"
-                    title={index + 1}
+                    title={`第${index + 1}集`}
                   >
                     {item.ep} | {item.title}
                   </summary>
@@ -139,9 +148,9 @@ function App() {
             是解析<code>標題, 提及作品</code>欄位中的<code>《》</code>
             自動生成
           </li>
-          <li>目前與資料來源非同步(不會即時更新)，等有空會改成同步</li>
+          <li>目前資料"應該"是同步的，如果發現怪怪的請告訴我喔</li>
           <li>
-            在 discord 中 <code>@handred800</code> 可以找到我 :D
+            在 discord 中 <code>@handred800</code> 可以找到我，也歡迎聊天 :D
           </li>
         </ul>
       </Modal>
