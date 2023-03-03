@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import "./style.css";
 import { useEffect, useMemo, useState } from "react";
 import { uniq, filter, some, isEmpty } from "lodash";
@@ -7,6 +8,7 @@ import { mentionParser, csvFormatter } from "./helper";
 
 function App() {
   const [data, setData] = useState([]);
+  const [type, setType] = useState("");
   const [keyword, setKeyword] = useState("");
   const { isShowing, toggle } = useModal();
 
@@ -16,13 +18,18 @@ function App() {
     )
       .then((res) => res.json())
       .then((data) => {
-        const list = csvFormatter(data.values).map(({ title, mention, ...res }) => {
-          return {
-            title,
-            mention: uniq([...mentionParser(title), ...mentionParser(mention)]),
-            ...res,
-          };
-        })
+        const list = csvFormatter(data.values).map(
+          ({ title, mention, ...res }) => {
+            return {
+              title,
+              mention: uniq([
+                ...mentionParser(title),
+                ...mentionParser(mention),
+              ]),
+              ...res,
+            };
+          }
+        );
 
         setData(list);
       });
@@ -38,10 +45,11 @@ function App() {
         description.toLowerCase().includes(lowerKeyword) ||
         some(mention, (name) => name.toLowerCase().includes(lowerKeyword))
     );
-  }, [data, keyword]);
+  }, [data, type, keyword]);
 
   return (
     <>
+      <Analytics />
       {/* header */}
       <div className="hero is-dark">
         <div className="hero-body">
@@ -64,10 +72,23 @@ function App() {
               className="field has-addons"
               onSubmit={(e) => {
                 e.preventDefault();
-                const val = document.querySelector("#search").value;
-                setKeyword(val);
+                const _keyword = document.querySelector("#search").value;
+                const _type = document.querySelector("#type").value;
+                setKeyword(_keyword);
+                setType(_type);
               }}
             >
+              <div className="control">
+                <div className="select">
+                  <select id="type">
+                    <option value="">全部</option>
+                    <option value="EP">EP</option>
+                    <option value="雜談/不喝牛奶">雜談/不喝牛奶</option>
+                    <option value="棉花糖">棉花糖</option>
+                    <option value="0">其他</option>
+                  </select>
+                </div>
+              </div>
               <div className="control">
                 <input
                   type="search"
