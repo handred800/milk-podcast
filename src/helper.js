@@ -1,3 +1,5 @@
+import { some, filter, isString } from 'lodash';
+
 export const mentionParser = (inputString) => {
     if (inputString === '') return [];
     const regexp = /《(.*?)》/g;
@@ -15,4 +17,16 @@ export const csvFormatter = (csvArrary) => {
         }
         return obj;
     })
+}
+
+export const matcher = (target, compare) => {
+    return target.toLowerCase().includes(compare.trim().toLowerCase());
+}
+
+export const arraryContainCheck = (target, compare) => {
+    if (isString(compare)) {
+        return some(target, (item) => matcher(item, compare))
+    } else {
+        return some(compare, (compareWord) => arraryContainCheck(target, compareWord))
+    }
 }

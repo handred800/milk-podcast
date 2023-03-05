@@ -1,10 +1,15 @@
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from "@vercel/analytics/react";
 import "./style.css";
 import { useEffect, useMemo, useState } from "react";
-import { uniq, filter, some, isEmpty } from "lodash";
+import { chain, uniq, isEmpty, some } from "lodash";
 import useModal from "./useModal";
 import Modal from "./modal";
-import { mentionParser, csvFormatter } from "./helper";
+import {
+  mentionParser,
+  csvFormatter,
+  matcher,
+  arraryContainCheck,
+} from "./helper";
 
 function App() {
   const [data, setData] = useState([]);
@@ -36,15 +41,17 @@ function App() {
   }, []);
 
   const filtedData = useMemo(() => {
-    if (keyword === "") return data;
-    const lowerKeyword = keyword.toLowerCase();
-    return filter(
-      data,
-      ({ title, description, mention }) =>
-        title.toLowerCase().includes(lowerKeyword) ||
-        description.toLowerCase().includes(lowerKeyword) ||
-        some(mention, (name) => name.toLowerCase().includes(lowerKeyword))
-    );
+    if (type === "" && keyword === "") return data;
+    const keywords = keyword.split(" ");
+    const types = type.split(" ");
+    return chain(data)
+      .filter(({ ep }) => {
+        return arraryContainCheck([ep], types);
+      })
+      .filter(({ title, description, mention }) =>
+        arraryContainCheck([title, description, ...mention], keywords)
+      )
+      .value();
   }, [data, type, keyword]);
 
   return (
@@ -83,9 +90,9 @@ function App() {
                   <select id="type">
                     <option value="">全部</option>
                     <option value="EP">EP</option>
-                    <option value="雜談/不喝牛奶">雜談/不喝牛奶</option>
+                    <option value="雜談 不喝牛奶">雜談/不喝牛奶</option>
                     <option value="棉花糖">棉花糖</option>
-                    <option value="0">其他</option>
+                    {/* <option value="0">其他</option> */}
                   </select>
                 </div>
               </div>

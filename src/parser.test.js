@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mentionParser, csvFormatter } from './helper';
+import { mentionParser, csvFormatter, arraryContainCheck } from './helper';
 
 describe('regpx', () => {
     it('mentionParser', () => {
@@ -28,5 +28,15 @@ describe('csv', () => {
             },            
         ]
         expect(csvFormatter(csvArrary)).toEqual(json);
+    })
+})
+
+describe('checkArrayContain', () => {
+    it('check array contain', () => {
+        const trueTarget = ['food', 'is', 'good'];
+        const falseTarget = ['food', 'is', 'nice'];
+        const keywords = ['bad', 'good'];
+        expect(arraryContainCheck(trueTarget, keywords)).toBe(true);
+        expect(arraryContainCheck(falseTarget, keywords)).toBe(false);
     })
 })
