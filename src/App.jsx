@@ -1,17 +1,17 @@
 import { Analytics } from "@vercel/analytics/react";
 import "./style.css";
 import { useEffect, useMemo, useState } from "react";
-import { chain, uniq, isEmpty, some } from "lodash";
+import { chain, uniq, isEmpty,  } from "lodash";
 import useModal from "./useModal";
 import Modal from "./modal";
 import {
   mentionParser,
   csvFormatter,
-  matcher,
   arraryContainCheck,
 } from "./helper";
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
   const [type, setType] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -23,6 +23,7 @@ function App() {
     )
       .then((res) => res.json())
       .then((data) => {
+        setIsLoading(false);
         const list = csvFormatter(data.values).map(
           ({ title, mention, ...res }) => {
             return {
@@ -34,7 +35,7 @@ function App() {
               ...res,
             };
           }
-        );
+        ).reverse();
 
         setData(list);
       });
@@ -92,7 +93,7 @@ function App() {
                     <option value="EP">EP</option>
                     <option value="雜談 不喝牛奶">雜談/不喝牛奶</option>
                     <option value="棉花糖">棉花糖</option>
-                    {/* <option value="0">其他</option> */}
+                    <option value="LIVE">LIVE Podcast</option>
                   </select>
                 </div>
               </div>
@@ -116,6 +117,7 @@ function App() {
       {/* main */}
       <main>
         <div className="container is-max-desktop pt-6">
+        { isLoading && (<div className="title is-5">牛奶準備中...</div>) }
           <ul className="px-3">
             {filtedData.map((item, index) => (
               <li key={`${item.ep}${index}`}>
